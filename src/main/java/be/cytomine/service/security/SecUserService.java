@@ -599,10 +599,13 @@ public class SecUserService extends ModelService {
         String order = "";
         String having = "";
         String sortDir = sortDirection.toLowerCase().equals("desc") ? " DESC " : " ASC ";
+        Map<String, Object> mapParams = new HashMap<>();
 
         if (multiSearch.isPresent()) {
             String value = ((String) multiSearch.get().getValue()).toLowerCase();
-            where += " and (lower(secUser.firstname) like '%$value%' or lower(secUser.lastname) like '%" + value + "%' or lower(secUser.email) like '%" + value + "%') ";
+            where += " and (lower(secUser.firstname) like '%$value%' or lower(secUser.lastname) like :name or lower(secUser.email) like :name) ";
+            value = "%"+value+"%";
+            mapParams.put("name", value);
         }
         if (onlineUserSearch.isPresent()) {
             where += " and secUser.id in :online_users ";
@@ -643,6 +646,9 @@ public class SecUserService extends ModelService {
 
 
         Query query = getEntityManager().createQuery(request, Object[].class);
+        for (Map.Entry<String, Object> entry : mapParams.entrySet()) {
+            query.setParameter(entry.getKey(), entry.getValue());
+        }
         if (onlineUserSearch.isPresent()) { // Check if onlineUserSearch was present
             List<Long> onlineUsers = getAllOnlineUserIds(project);
             if (onlineUsers.isEmpty()) {
