@@ -278,8 +278,10 @@ public class ImageInstanceService extends ModelService {
         String imageInstanceAlias = "ui";
         String abstractImageAlias = "ai";
 
+        // Just quick fix to avoid injections
+        Set<String> allowedSortColumns = new HashSet<>(Arrays.asList("id", "created", "updated", "instanceFilename", "numberOfAnnotations", "numberOfJobAnnotations", "numberOfReviewedAnnotations", "name", "blindedName","countImageJobAnnotations","countImageReviewedAnnotations","countImageAnnotations"));
 
-        if (sortColumn==null) {
+        if (sortColumn==null || !allowedSortColumns.contains(sortColumn)) {
             sortColumn = "created";
         }
         if (sortDirection==null) {
@@ -452,7 +454,10 @@ public class ImageInstanceService extends ModelService {
         String abstractImageAlias = "ai";
         String mimeAlias = "mime";
 
-        if (sortColumn==null) {
+        // Just quick fix to avoid injections
+        Set<String> allowedSortColumns = new HashSet<>(Arrays.asList("id", "created", "updated", "instanceFilename", "numberOfAnnotations", "numberOfJobAnnotations", "numberOfReviewedAnnotations", "name", "blindedName","countImageJobAnnotations","countImageReviewedAnnotations","countImageAnnotations"));
+
+        if (sortColumn==null || !allowedSortColumns.contains(sortColumn)) {
             sortColumn = "created";
         }
         if (sortDirection==null) {
