@@ -345,12 +345,21 @@ public class SecUserService extends ModelService {
 
         // Just quick fix to avoid injections
         Set<String> allowedSortColumns = new HashSet<>(Arrays.asList("username", "firstname", "lastname", "email", "id", "role", "fullName"));
-        if (sortColumn == null || !allowedSortColumns.contains(sortColumn)) {
-            sortColumn = "username";
+        String validatedSortColumn = null; 
+        if (allowedSortColumns.contains(sortColumn)) {
+            for(String c: allowedSortColumns){
+                if(c.equals(sortColumn)){
+                    validatedSortColumn = c;
+                    break;                    
+                }
+            }
+        }
+        else {
+            validatedSortColumn = "username";
         }
         String sortDir = sortDirection.toLowerCase().equals("desc") ? " DESC " : " ASC ";
 
-        if (sortColumn.equals("role") && !userSearchExtension.isWithRoles()) {
+        if (validatedSortColumn.equals("role") && !userSearchExtension.isWithRoles()) {
             throw new WrongArgumentException("Cannot sort on user role without argument withRoles");
         }
 
@@ -383,12 +392,12 @@ public class SecUserService extends ModelService {
             groupBy = "GROUP BY u.id ";
         }
 
-        if (sortColumn.equals("role")) {
+        if (validatedSortColumn.equals("role")) {
             sort = "ORDER BY role " + sortDir + ", u.id ASC ";
-        } else if (sortColumn.equals("fullName")) {
+        } else if (validatedSortColumn.equals("fullName")) {
             sort = "ORDER BY u.firstname " + sortDir + ", u.id ";
-        } else if (!sortColumn.equals("id")) { //avoid random sort when multiple values of the
-            sort = "ORDER BY u." + sortColumn + " " + sortDir + ", u.id ";
+        } else if (!validatedSortColumn.equals("id")) { //avoid random sort when multiple values of the
+            sort = "ORDER BY u." + validatedSortColumn + " " + sortDir + ", u.id ";
         } else sort = "ORDER BY u.id " + sortDir + " ";
 
         String request = select + from + where + search + groupBy + sort;
@@ -564,6 +573,20 @@ public class SecUserService extends ModelService {
         Optional<SearchParameterEntry> multiSearch = searchParameters.stream().filter(x -> x.getProperty().equals("fullName")).findFirst();
         Optional<SearchParameterEntry> projectRoleSearch = searchParameters.stream().filter(x -> x.getProperty().equals("projectRole")).findFirst();
 
+        // Just quick fix to avoid injections
+        Set<String> allowedSortColumns = new HashSet<>(Arrays.asList("username", "firstname", "lastname", "email", "id", "role", "projectRole", "fullName"));
+        String validatedSortColumn = null; 
+        if (allowedSortColumns.contains(sortColumn)) {
+            for(String c: allowedSortColumns){
+                if(c.equals(sortColumn)){
+                    validatedSortColumn = c;
+                    break;                    
+                }
+            }
+        }
+        else {
+            validatedSortColumn = "username";
+        }
         String select = "select distinct secUser ";
         String from = "from ProjectRepresentativeUser r right outer join r.user secUser ON (r.project.id = " + project.getId() + "), " +
                 "AclObjectIdentity as aclObjectId, AclEntry as aclEntry, AclSid as aclSid ";
@@ -600,14 +623,14 @@ public class SecUserService extends ModelService {
                 " END) as role ";
         groupBy = "GROUP BY secUser.id ";
 
-        if (sortColumn.equals("projectRole")) {
-            sortColumn = "role";
-        } else if (sortColumn.equals("fullName")) {
-            sortColumn = "secUser.firstname";
+        if (validatedSortColumn.equals("projectRole")) {
+            validatedSortColumn = "role";
+        } else if (validatedSortColumn.equals("fullName")) {
+            validatedSortColumn = "secUser.firstname";
         } else {
-            sortColumn = "secUser." + sortColumn;
+            validatedSortColumn = "secUser." + validatedSortColumn;
         }
-        order = " order by " + sortColumn + " " + sortDir;
+        order = " order by " + validatedSortColumn + " " + sortDir;
 
         String request = select + from + where + groupBy + having + order;
 
