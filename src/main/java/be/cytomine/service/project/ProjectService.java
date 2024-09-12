@@ -332,7 +332,12 @@ public class ProjectService extends ModelService {
         Set<String> allowedSortColumns = new HashSet<>(Arrays.asList("id", "name", "created", "updated", "ontology_name", "currentUserRole", "membersCount", "lastActivity", "numberOfImages", "numberOfAnnotations", "numberOfJobAnnotations", "numberOfReviewedAnnotations"));
         String validatedSortColumn = null; 
         if (allowedSortColumns.contains(sortColumn)) {
-            validatedSortColumn = sortColumn;
+            for(String c: allowedSortColumns){
+                if(c.equals(sortColumn)){
+                    validatedSortColumn = c;
+                    break;                    
+                }
+            }
         }
         else {
             validatedSortColumn = "created";
