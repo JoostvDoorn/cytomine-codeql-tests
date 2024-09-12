@@ -616,7 +616,7 @@ public class SecUserService extends ModelService {
             List<String> roles = (projectRoleSearch.get().getValue() instanceof String) ? List.of((String) projectRoleSearch.get().getValue()) : (List<String>) projectRoleSearch.get().getValue();
             having += " HAVING MAX(CASE WHEN r.id IS NOT NULL THEN 'representative' " +
                     "WHEN aclEntry.mask = 16 THEN 'manager' " +
-                    "ELSE 'contributor' END) IN (" + roles.stream().map(x -> "'" + x + "'").collect(Collectors.joining(",")) + ")";
+                    "ELSE 'contributor' END) IN (:roles) ";
         }
 
         //works because 'contributor' < 'manager' < 'representative'
@@ -646,6 +646,10 @@ public class SecUserService extends ModelService {
 
 
         Query query = getEntityManager().createQuery(request, Object[].class);
+        if (projectRoleSearch.isPresent()) {
+            List<String> roles = (projectRoleSearch.get().getValue() instanceof String) ? List.of((String) projectRoleSearch.get().getValue()) : (List<String>) projectRoleSearch.get().getValue();
+            query.setParameter("roles", roles);
+        }
         for (Map.Entry<String, Object> entry : mapParams.entrySet()) {
             query.setParameter(entry.getKey(), entry.getValue());
         }
